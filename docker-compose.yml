@@ -1,0 +1,97 @@
+# docker-compose.yml
+
+version: '3.7'
+
+services:
+  flask:
+    image: webapp-flask
+    build:
+      context: .
+      dockerfile: ./resources/utils/dockerfiles/flask.Dockerfile
+    volumes:
+      - ./app:/app
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - uiio
+      - dbio
+      
+  nginx:    
+    image: rproxy-nginx
+    restart: always
+    build:
+      context: .
+      dockerfile: ./resources/utils/dockerfiles/nginx.Dockerfile
+    ports:
+      - 8989:80
+    depends_on:
+      - flask
+    networks:
+      - uiio
+
+  # postgres:
+  #   image: db-postgres
+  #   restart: always
+  #   build:
+  #     context: .
+  #     dockerfile: ./resources/utils/dockerfiles/postgres.Dockerfile
+  #   ports:
+  #     - 5432:5432
+  #   environment:
+  #     # - PGDATA=/var/lib/postgresql/flaskdata
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #   volumes:
+  #     - appdb_postgresql:/var/lib/postgresql/flaskdata
+  #   networks:
+  #     - dbio
+    
+  mysql:
+    image: db-mysql
+    restart: always
+    build:
+      context: .
+      dockerfile: ./resources/utils/dockerfiles/mysql.Dockerfile
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: "secret#37"
+      MYSQL_DATABASE: "dsdb"
+      MYSQL_USER: "dsapp"
+      MYSQL_PASSWORD: "test123"
+    volumes:
+      - appdb_mysql:/var/lib/mysql
+    networks:
+      - dbio
+  
+  redis:
+    image: session-redis
+    restart: always
+    build:
+      context: .
+      dockerfile: ./resources/utils/dockerfiles/redis.Dockerfile
+    ports:
+      - 6379:6379
+    volumes:
+      - appsess_redis:/data
+    # depends_on:
+    #   - mysql
+    #   - redis
+    networks:
+      - dbio
+
+volumes:
+  appdb_postgresql:
+  appdb_mysql:
+  appsess_redis:
+    # Default driver for volume in current configuration
+    # driver: local
+    # Use this if volume is composed external to docker-compose
+    # external: true
+
+networks:
+  uiio:
+    driver: bridge
+  dbio:
+    driver: bridge
