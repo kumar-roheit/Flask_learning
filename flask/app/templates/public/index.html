@@ -1,7 +1,13 @@
+<!WILL CONTAIN ANY HTML FILES WE'LL SERVE FROM views.py>
+<!Flask provides a very simple way for us to return HTML files to the client/browser, using the render_template function>
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <!These double curly braces are part of the Jinja templating engine that Flask uses to render our HTML templates.>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -11,6 +17,7 @@
 <body>
   <h1 style="color: blue">Index</h1>
   <p>This is an HTML file served up by Flask</p>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 
 </html>
